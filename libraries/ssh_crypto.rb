@@ -38,19 +38,70 @@ class SshCrypto < Inspec.resource(1)
   end
 
   def valid_kexs
+    # define a set of default KEXs
     kex85 = 'sntrup761x25519-sha512@openssh.com,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256'
     kex80 = 'sntrup4591761x25519-sha512@tinyssh.org,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256'
     kex66 = 'curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256'
     kex59 = 'diffie-hellman-group-exchange-sha256'
-    if ssh_version >= 8.5
-      kex85
-    elsif ssh_version >= 8.0
-      kex80
-    elsif ssh_version >= 6.6
-      kex66
-    else
-      kex59
+    kex = kex59
+
+    # adjust KEXs based on OS + release
+    case inspec.os[:name]
+    # https://packages.ubuntu.com/search?keywords=openssh-server
+    when 'ubuntu'
+      kex = if inspec.os[:release][0, 2] >= '22'
+              kex85
+            elsif inspec.os[:release][0, 2] >= '19'
+              kex80
+            else
+              kex66
+            end
+    # https://packages.debian.org/search?keywords=openssh-server
+    when 'debian'
+      case inspec.os[:release]
+      when /^6\./
+        kex = nil
+      when /^7\./
+        kex = kex59
+      when /^8\./, /^9\./, /^10\./
+        kex = kex66
+      when /^11\./
+        kex = kex80
+      end
+    when 'redhat', 'centos', 'oracle', 'rocky', 'almalinux'
+      case inspec.os[:release]
+      when /^6\./
+        kex = nil
+      when /^7\./
+        kex = kex66
+      when /^8.*/, /^9.*/
+        kex = kex80
+      end
+    # https://pkgs.alpinelinux.org/packages?name=openssh
+    # https://src.fedoraproject.org/rpms/openssh
+    # https://software.opensuse.org/package/openssh
+    when 'alpine', 'arch', 'fedora', 'opensuse'
+      kex = if ssh_version >= 8.5
+              kex85
+            elsif ssh_version >= 8.0
+              kex80
+            elsif ssh_version >= 6.6
+              kex66
+            end
+    when 'amazon'
+      kex = kex66
+    when 'mac_os_x'
+      case inspec.os[:release]
+      when /^10.9\./
+        kex = kex59
+      when /^10.10\./, /^10.11\./, /^10.12\./
+        kex = kex66
+      when /^10.15\./
+        kex = kex80
+      end
     end
+
+    kex
   end
 
   def valid_macs

@@ -211,10 +211,10 @@ end
 control 'sshd-16' do
   impact 1.0
   title 'Server: Use privilege separation'
-  desc 'UsePrivilegeSeparation is an option, when enabled will allow the OpenSSH server to run a small (necessary) amount of code as root and the of the code in a chroot jail environment. This enables ssh to deal incoming network traffic in an unprivileged child process to avoid privilege escalation by an attacker.'
+  desc 'UsePrivilegeSeparation is an option in OpenSSH versions prior to 7.5. For versions 7.5 and later, privilege separation is mandatory and this option is deprecated. When enabled will allow the OpenSSH server to run a small (necessary) amount of code as root and the of the code in a chroot jail environment. This enables ssh to deal incoming network traffic in an unprivileged child process to avoid privilege escalation by an attacker.'
+  only_if { ssh_crypto.ssh_version < 7.5 }
   describe sshd_config("#{sshd_custom_path}/sshd_config") do
     its('UsePrivilegeSeparation') { should eq(sshd_valid_privseparation) }
-  end
 end
 
 control 'sshd-17' do
