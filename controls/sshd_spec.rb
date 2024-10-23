@@ -215,6 +215,7 @@ control 'sshd-16' do
   only_if { ssh_crypto.ssh_version < 7.5 }
   describe sshd_config("#{sshd_custom_path}/sshd_config") do
     its('UsePrivilegeSeparation') { should eq(sshd_valid_privseparation) }
+  end
 end
 
 control 'sshd-17' do
