@@ -116,7 +116,12 @@ control 'sshd-06' do
   title 'Server: Do not permit root-based login or do not allow password and keyboard-interactive authentication'
   desc 'Reduce the potential risk to gain full privileges access of the system because of weak password and keyboard-interactive authentication, do not allow logging in as the root user or with password authentication.'
   describe sshd_config("#{sshd_custom_path}/sshd_config") do
-    its('PermitRootLogin') { should match(/no|without-password|prohibit-password/) }
+    it 'PermitRootLogin should match no/without-password/prohibit-password' do
+      value = subject.PermitRootLogin
+      Array(value).each do |v|
+        expect(v).to match(/no|without-password|prohibit-password/)
+      end
+    end
   end
 end
 
@@ -306,7 +311,12 @@ control 'sshd-27' do
   title 'Server: Disable password-based authentication'
   desc 'Avoid password-based authentications.'
   describe sshd_config("#{sshd_custom_path}/sshd_config") do
-    its('PasswordAuthentication') { should eq('no') }
+    it 'PasswordAuthentication should be no' do
+      value = subject.PasswordAuthentication
+      Array(value).each do |v|
+        expect(v).to eq('no')
+      end
+    end
   end
 end
 
@@ -414,7 +424,12 @@ control 'sshd-39' do
   title 'Server: Disable TCP forwarding'
   desc 'If you use TCP forwarding in an uncontrolled manner then you can bypass the firewalls'
   describe sshd_config("#{sshd_custom_path}/sshd_config") do
-    its('AllowTcpForwarding') { should eq(sshd_tcpforwarding) }
+    it 'AllowTcpForwarding should match configured setting' do
+      value = subject.AllowTcpForwarding
+      Array(value).each do |v|
+        expect(v).to eq(sshd_tcpforwarding)
+      end
+    end
   end
 end
 
@@ -423,7 +438,12 @@ control 'sshd-40' do
   title 'Server: Disable Agent forwarding'
   desc "Users with the ability to bypass file permissions on the remote host (for the agent's UNIX-domain socket) can access the local agent through the forwarded connection. An attacker cannot obtain key material from the agent, however they can perform operations on the keys that enable them to authenticate using the identities loaded into the agent."
   describe sshd_config("#{sshd_custom_path}/sshd_config") do
-    its('AllowAgentForwarding') { should eq(sshd_agentforwarding) }
+    it 'AllowAgentForwarding should match configured setting' do
+      value = subject.AllowAgentForwarding
+      Array(value).each do |v|
+        expect(v).to eq(sshd_agentforwarding)
+      end
+    end
   end
 end
 
@@ -441,7 +461,12 @@ control 'sshd-42' do
   title 'Server: Disable X11Forwarding'
   desc 'Prevent X11 forwarding by default, as it can be used in a limited way to enable attacks.'
   describe sshd_config("#{sshd_custom_path}/sshd_config") do
-    its('X11Forwarding') { should eq(sshd_x11forwarding) }
+    it 'X11Forwarding should match configured setting' do
+      value = subject.X11Forwarding
+      Array(value).each do |v|
+        expect(v).to eq(sshd_x11forwarding)
+      end
+    end
   end
 end
 
